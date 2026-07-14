@@ -1,55 +1,64 @@
+import Link from "next/link";
+
 import { DashboardShell } from "@/app/components/layout";
-import { Card, CardTitle, CardValue, Table, TBody, Td, Th, THead, Tr } from "@/app/components/ui";
-import { getRestaurants } from "@/app/services/restaurants";
+import { Card, CardTitle, CardValue } from "@/app/components/ui";
+import { formatCurrency } from "@/app/lib/utils";
+import { getOrderCounters } from "@/app/services/orders";
+import { getTables } from "@/app/services/tables";
 
-interface Stat {
-  label: string;
-  value: string;
-}
-
-const STATS: Stat[] = [
-  { label: "Visitors", value: "1,234" },
-  { label: "Sales", value: "$5,678" },
-  { label: "Orders", value: "89" },
-];
+import { SalesCard } from "@/app/features/dashboard/SalesCard";
 
 export default async function Dashboard() {
-  const restaurants = await getRestaurants();
+  const [tables, counters] = await Promise.all([
+    getTables(),
+    getOrderCounters(),
+  ]);
+
+  const freeTables = tables.filter((t) => t.status === "free").length;
+  const occupiedTables = tables.filter((t) => t.status === "occupied").length;
 
   return (
-    <DashboardShell title="Restaurant Dashboard">
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {STATS.map((stat) => (
-          <Card key={stat.label}>
-            <CardTitle>{stat.label}</CardTitle>
-            <CardValue>{stat.value}</CardValue>
-          </Card>
-        ))}
+    <DashboardShell title="Dashboard">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardTitle>Open orders</CardTitle>
+          <CardValue>{counters.open}</CardValue>
+        </Card>
+        <Card>
+          <CardTitle>Awaiting payment</CardTitle>
+          <CardValue>{counters.awaitingPayment}</CardValue>
+        </Card>
+        <Card>
+          <CardTitle>Tables free</CardTitle>
+          <CardValue>
+            {freeTables}
+            <span className="ml-2 text-base font-normal text-[var(--text-muted)]">
+              / {tables.length}
+            </span>
+          </CardValue>
+        </Card>
+        <Card>
+          <CardTitle>Tables occupied</CardTitle>
+          <CardValue>
+            {occupiedTables}
+            <span className="ml-2 text-base font-normal text-[var(--text-muted)]">
+              / {tables.length}
+            </span>
+          </CardValue>
+        </Card>
       </section>
 
-      <section>
-        <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
-          Restaurants
-        </h2>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>ID</Th>
-              <Th>Name</Th>
-              <Th>City</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {restaurants.map((r) => (
-              <Tr key={r.id}>
-                <Td>{r.id}</Td>
-                <Td>{r.name}</Td>
-                <Td>{r.city}</Td>
-              </Tr>
-            ))}
-          </TBody>
-        </Table>
+      <SalesCard totalSales={counters.totalSales} paidCount={counters.paid} />
+
+      <section className="text-sm text-[var(--text-secondary)]">
+        Tip: open <Link className="underline text-[var(--aurora-1)]" href="/tables">Tables</Link> to manage
+        shifts, orders, and payments.
       </section>
+
+      <p className="text-xs text-[var(--text-muted)]">
+        Demo · Data is in-memory and resets on server restart.
+        ({formatCurrency(0)}/mo? No — {formatCurrency(counters.totalSales)} total)
+      </p>
     </DashboardShell>
   );
 }

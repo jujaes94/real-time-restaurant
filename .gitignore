@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI agent / tooling artifacts (README.md is the only doc kept)
+.agents/
+**/.agents/
+skills-lock.json
+AGENTS.md
+CLAUDE.md
+PLAN.md

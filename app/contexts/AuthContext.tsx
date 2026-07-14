@@ -8,33 +8,49 @@ import {
   useState,
 } from "react";
 
-interface User {
-  email: string;
-  name?: string;
-}
+import { findUser, type User } from "@/app/services/users";
+import type { Role } from "@/app/services/roles";
 
 interface AuthContextValue {
   user: User | null;
-  signIn: (email: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User>;
   signOut: () => void;
+  hasRole: (role: Role) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+export class AuthenticationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AuthenticationError";
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const signIn = useCallback(async (email: string) => {
-    setUser({ email });
+  const signIn = useCallback(async (email: string, password: string) => {
+    const found = findUser(email, password);
+    if (!found) {
+      throw new AuthenticationError("Invalid email or password");
+    }
+    setUser(found);
+    return found;
   }, []);
 
   const signOut = useCallback(() => {
     setUser(null);
   }, []);
 
+  const hasRole = useCallback(
+    (role: Role) => user?.role === role,
+    [user],
+  );
+
   const value = useMemo(
-    () => ({ user, signIn, signOut }),
-    [user, signIn, signOut],
+    () => ({ user, signIn, signOut, hasRole }),
+    [user, signIn, signOut, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -55,10 +55,6 @@ app/
 
 See [`AGENTS.md`](./AGENTS.md) for the full structure tree, architecture conventions, and Next.js 16 critical changes.
 
-## Design Reference
-
-`base-design.webp` at the repo root is the visual design mockup. Consult it before building UI to match the intended look and feel.
-
 ## Documentation
 
 - [`AGENTS.md`](./AGENTS.md) — Project guide, tech stack, conventions, Next.js 16 notes, and roadmap. This is the primary reference for AI agents (and developers) working on the project.
