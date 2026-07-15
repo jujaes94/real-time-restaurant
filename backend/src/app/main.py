@@ -20,7 +20,19 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 
-app = FastAPI(title="Restaurant Management API", lifespan=lifespan)
+app = FastAPI(
+    title="Restaurant Management API",
+    description="Multi-restaurant management system. Supports Admin, Manager, and Waitress roles with JWT authentication.",
+    version="0.1.0",
+    contact={"name": "Dev Team", "email": "dev@example.com"},
+    lifespan=lifespan,
+    swagger_ui_parameters={"tryItOutEnabled": True},
+    openapi_tags=[
+        {"name": "auth", "description": "User registration and login"},
+        {"name": "restaurants", "description": "Restaurant CRUD and manager assignment"},
+        {"name": "tables", "description": "Table management and status updates"},
+    ],
+)
 
 
 @app.exception_handler(NotFoundError)

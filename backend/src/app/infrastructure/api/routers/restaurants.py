@@ -25,7 +25,7 @@ from app.infrastructure.repositories.beanie_repositories import (
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 
-@router.get("/", response_model=list[RestaurantResponse])
+@router.get("/", response_model=list[RestaurantResponse], summary="List all restaurants")
 async def list_restaurants(
     _=Depends(require_role(UserRole.ADMIN, UserRole.MANAGER, UserRole.WAITRESS)),
 ) -> list[RestaurantResponse]:
@@ -35,7 +35,7 @@ async def list_restaurants(
     return [RestaurantResponse(**r.__dict__) for r in restaurants]
 
 
-@router.get("/{restaurant_id}", response_model=RestaurantResponse)
+@router.get("/{restaurant_id}", response_model=RestaurantResponse, summary="Get restaurant by ID")
 async def get_restaurant(
     restaurant_id: UUID,
     _=Depends(require_role(UserRole.ADMIN, UserRole.MANAGER, UserRole.WAITRESS)),
@@ -46,7 +46,7 @@ async def get_restaurant(
     return RestaurantResponse(**restaurant.__dict__)
 
 
-@router.post("/", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED, summary="Create a new restaurant (Admin only)")
 async def create_restaurant(
     dto: RestaurantCreate,
     _=Depends(require_role(UserRole.ADMIN)),
@@ -57,7 +57,7 @@ async def create_restaurant(
     return RestaurantResponse(**restaurant.__dict__)
 
 
-@router.put("/{restaurant_id}", response_model=RestaurantResponse)
+@router.put("/{restaurant_id}", response_model=RestaurantResponse, summary="Update restaurant (Admin/Manager)")
 async def update_restaurant(
     restaurant_id: UUID,
     dto: RestaurantUpdate,
@@ -69,7 +69,7 @@ async def update_restaurant(
     return RestaurantResponse(**restaurant.__dict__)
 
 
-@router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete restaurant (Admin only)")
 async def delete_restaurant(
     restaurant_id: UUID,
     _=Depends(require_role(UserRole.ADMIN)),
@@ -83,6 +83,7 @@ async def delete_restaurant(
     "/{restaurant_id}/assign-manager",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
+    summary="Assign a manager to a restaurant (Admin only)",
 )
 async def assign_manager(
     restaurant_id: UUID,

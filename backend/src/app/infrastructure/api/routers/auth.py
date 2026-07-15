@@ -16,7 +16,7 @@ from app.infrastructure.repositories.beanie_repositories import (
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, summary="Register a new user")
 async def register(dto: UserCreate) -> UserResponse:
     user_repo = BeanieUserRepository()
     hasher = PasswordHasher()
@@ -25,7 +25,7 @@ async def register(dto: UserCreate) -> UserResponse:
     return UserResponse(**user.__dict__)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, summary="Authenticate and get JWT token")
 async def login(dto: LoginRequest) -> TokenResponse:
     user_repo = BeanieUserRepository()
     hasher = PasswordHasher()

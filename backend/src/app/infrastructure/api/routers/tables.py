@@ -22,7 +22,7 @@ from app.infrastructure.repositories.beanie_repositories import (
 router = APIRouter(prefix="/tables", tags=["tables"])
 
 
-@router.get("/", response_model=list[TableResponse])
+@router.get("/", response_model=list[TableResponse], summary="List tables for a restaurant")
 async def list_tables(
     restaurant_id: UUID = Query(...),
     _=Depends(require_role(UserRole.ADMIN, UserRole.MANAGER, UserRole.WAITRESS)),
@@ -33,7 +33,7 @@ async def list_tables(
     return [TableResponse(**t.__dict__) for t in tables]
 
 
-@router.post("/", response_model=TableResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=TableResponse, status_code=status.HTTP_201_CREATED, summary="Create a new table (Admin/Manager)")
 async def create_table(
     dto: TableCreate,
     _=Depends(require_role(UserRole.ADMIN, UserRole.MANAGER)),
@@ -45,7 +45,7 @@ async def create_table(
     return TableResponse(**table.__dict__)
 
 
-@router.patch("/{table_id}/status", response_model=TableResponse)
+@router.patch("/{table_id}/status", response_model=TableResponse, summary="Update table status (All roles)")
 async def update_table_status(
     table_id: UUID,
     dto: TableStatusUpdate,
@@ -58,7 +58,7 @@ async def update_table_status(
     return TableResponse(**table.__dict__)
 
 
-@router.delete("/{table_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{table_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a table (Admin/Manager)")
 async def delete_table(
     table_id: UUID,
     _=Depends(require_role(UserRole.ADMIN, UserRole.MANAGER)),
