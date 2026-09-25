@@ -86,7 +86,7 @@ export function AddWaitressDialog({ open, onClose, onSubmit, restaurants }: Prop
           >
             {restaurants.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name} — {r.city}
+                {r.name} — {r.address}
               </option>
             ))}
           </select>

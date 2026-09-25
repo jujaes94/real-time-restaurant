@@ -27,16 +27,64 @@ export class AuthenticationError extends Error {
   }
 }
 
+interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+interface ApiUserResponse {
+  id: string;
+  email: string;
+  username: string;
+  full_name: string;
+  role: string;
+  restaurant_id: string | null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const found = findUser(email, password);
-    if (!found) {
-      throw new AuthenticationError("Invalid email or password");
+    try {
+      const loginRes = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!loginRes.ok) {
+        throw new AuthenticationError("Invalid email or password");
+      }
+      const loginData: LoginResponse = await loginRes.json();
+      const token = loginData.access_token;
+
+      const profileRes = await fetch("http://localhost:8000/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!profileRes.ok) {
+        throw new AuthenticationError("Failed to fetch user profile");
+      }
+      const profile: ApiUserResponse = await profileRes.json();
+
+      const u: User = {
+        id: profile.id,
+        email: profile.email,
+        name: profile.full_name,
+        role: profile.role as Role,
+        token,
+        restaurantId: profile.restaurant_id,
+      };
+      setUser(u);
+      return u;
+    } catch (err) {
+      if (err instanceof AuthenticationError) throw err;
+      const found = findUser(email, password);
+      if (!found) {
+        throw new AuthenticationError("Invalid email or password");
+      }
+      const u: User = { ...found, token: "mock-token" };
+      setUser(u);
+      return u;
     }
-    setUser(found);
-    return found;
   }, []);
 
   const signOut = useCallback(() => {

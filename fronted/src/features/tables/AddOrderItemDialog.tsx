@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Dialog } from "@/shared/components/ui";
 import { Button, Input } from "@/shared/components/ui";
-import type { MenuItem, MenuCategory } from "@/features/menu/menuItems";
+import type { LegacyMenuItem as MenuItem } from "@/features/menu/menuItems";
 import type { Order } from "@/features/orders/orders";
 
 type Props = {
@@ -15,12 +15,12 @@ type Props = {
   orders: Order[];
 };
 
-const CATEGORY_ORDER: MenuCategory[] = ["plate", "appetizer", "side", "drink", "dessert", "other"];
+const CATEGORY_ORDER: string[] = ["main", "appetizer", "side", "drink", "dessert"];
 
 export function AddOrderItemDialog({ open, onClose, onSubmit, menuItems, orders }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [categoryFilter, setCategoryFilter] = useState<MenuCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(
     orders.length === 1 ? orders[0].id : null,

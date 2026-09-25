@@ -10,7 +10,7 @@ import {
 } from "@/features/orders/orders";
 import { getRestaurant } from "@/shared/services/restaurants";
 import { getTable } from "@/features/tables/tables";
-import { getMenuItems } from "@/features/menu/menuItems";
+import { getMockMenuItems } from "@/features/menu/menuItems";
 
 export default async function TableDetailPage({
   params,
@@ -25,7 +25,7 @@ export default async function TableDetailPage({
   const [restaurant, orders, menuItems] = await Promise.all([
     getRestaurant(table.restaurantId),
     getOrdersForTable(tableId),
-    getMenuItems(),
+    getMockMenuItems(),
   ]);
 
   const visibleOrders = orders.filter((o) => o.status !== "paid");

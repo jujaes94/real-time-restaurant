@@ -1,65 +1,148 @@
-export type MenuCategory = "plate" | "drink" | "dessert" | "appetizer" | "side" | "other";
+export type MenuCategory = "appetizer" | "main" | "dessert" | "drink" | "side";
 
 export interface MenuItem {
-  id: number;
+  id: string;
+  restaurantId: string;
   name: string;
+  description: string;
+  price: number;
+  ingredients: string;
   category: MenuCategory;
+  size: string;
+  isVegetarian: boolean;
+  isVegan: boolean;
+  isActive: boolean;
+  isAvailable: boolean;
+  allergens: string | null;
+  preparationTime: number | null;
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function toCamel(obj: Record<string, unknown>): MenuItem {
+  return {
+    id: obj.id as string,
+    restaurantId: obj.restaurant_id as string,
+    name: obj.name as string,
+    description: (obj.description as string) ?? "",
+    price: obj.price as number,
+    ingredients: (obj.ingredients as string) ?? "",
+    category: obj.category as MenuCategory,
+    size: obj.size as string,
+    isVegetarian: obj.is_vegetarian as boolean,
+    isVegan: obj.is_vegan as boolean,
+    isActive: obj.is_active as boolean,
+    isAvailable: obj.is_available as boolean,
+    allergens: (obj.allergens as string | null) ?? null,
+    preparationTime: (obj.preparation_time as number | null) ?? null,
+    imageUrl: (obj.image_url as string | null) ?? null,
+    createdAt: obj.created_at as string,
+    updatedAt: obj.updated_at as string,
+  };
+}
+
+function toSnake(data: Partial<MenuItem>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (data.name !== undefined) out.name = data.name;
+  if (data.description !== undefined) out.description = data.description;
+  if (data.price !== undefined) out.price = data.price;
+  if (data.ingredients !== undefined) out.ingredients = data.ingredients;
+  if (data.category !== undefined) out.category = data.category;
+  if (data.size !== undefined) out.size = data.size;
+  if (data.isVegetarian !== undefined) out.is_vegetarian = data.isVegetarian;
+  if (data.isVegan !== undefined) out.is_vegan = data.isVegan;
+  if (data.isActive !== undefined) out.is_active = data.isActive;
+  if (data.isAvailable !== undefined) out.is_available = data.isAvailable;
+  if (data.allergens !== undefined) out.allergens = data.allergens;
+  if (data.preparationTime !== undefined) out.preparation_time = data.preparationTime;
+  if (data.imageUrl !== undefined) out.image_url = data.imageUrl;
+  if (data.restaurantId !== undefined) out.restaurant_id = data.restaurantId;
+  return out;
+}
+
+export async function getMenuItems(token: string, restaurantId: string): Promise<MenuItem[]> {
+  const res = await fetch(`http://localhost:8000/menus?restaurant_id=${restaurantId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Failed to fetch menu items: ${res.statusText}`);
+  const data = (await res.json()) as Record<string, unknown>[];
+  return data.map(toCamel);
+}
+
+export async function createMenuItem(token: string, data: Partial<MenuItem>): Promise<MenuItem> {
+  const res = await fetch("http://localhost:8000/menus", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(toSnake(data)),
+  });
+  if (!res.ok) throw new Error(`Failed to create menu item: ${res.statusText}`);
+  return toCamel((await res.json()) as Record<string, unknown>);
+}
+
+export async function updateMenuItem(token: string, id: string, data: Partial<MenuItem>): Promise<MenuItem> {
+  const res = await fetch(`http://localhost:8000/menus/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(toSnake(data)),
+  });
+  if (!res.ok) throw new Error(`Failed to update menu item: ${res.statusText}`);
+  return toCamel((await res.json()) as Record<string, unknown>);
+}
+
+export async function deleteMenuItem(token: string, id: string): Promise<void> {
+  const res = await fetch(`http://localhost:8000/menus/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Failed to delete menu item: ${res.statusText}`);
+}
+
+export async function toggleMenuItemAvailability(token: string, id: string, isAvailable: boolean): Promise<MenuItem> {
+  const res = await fetch(`http://localhost:8000/menus/${id}/availability`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ is_available: isAvailable }),
+  });
+  if (!res.ok) throw new Error(`Failed to toggle availability: ${res.statusText}`);
+  return toCamel((await res.json()) as Record<string, unknown>);
+}
+
+// ── Mock data for backward compat (tables/orders pages not yet connected) ──
+
+let mockNextId = 101;
+
+export interface LegacyMenuItem {
+  id: number;
+  restaurantId: number;
+  name: string;
+  category: string;
   price: number;
   description: string;
 }
 
-let nextId = 1;
-
-const MENU_ITEMS: MenuItem[] = [
-  { id: nextId++, name: "Grilled Salmon", category: "plate", price: 24, description: "Atlantic salmon with herbs and lemon butter sauce" },
-  { id: nextId++, name: "Beef Tenderloin", category: "plate", price: 32, description: "8oz tenderloin with red wine reduction" },
-  { id: nextId++, name: "Chicken Parmesan", category: "plate", price: 18, description: "Breaded chicken breast with marinara and mozzarella" },
-  { id: nextId++, name: "Vegetable Risotto", category: "plate", price: 16, description: "Creamy arborio rice with seasonal vegetables" },
-  { id: nextId++, name: "Caesar Salad", category: "appetizer", price: 10, description: "Romaine, parmesan, croutons, caesar dressing" },
-  { id: nextId++, name: "Bruschetta", category: "appetizer", price: 8, description: "Toasted bread with tomatoes, basil, and garlic" },
-  { id: nextId++, name: "French Onion Soup", category: "appetizer", price: 9, description: "Caramelized onion broth with gruyere crouton" },
-  { id: nextId++, name: "Sparkling Water", category: "drink", price: 4, description: "San Pellegrino 500ml" },
-  { id: nextId++, name: "House Red Wine", category: "drink", price: 8, description: "Glass of Chianti Classico" },
-  { id: nextId++, name: "Espresso Martini", category: "drink", price: 12, description: "Vodka, coffee liqueur, espresso" },
-  { id: nextId++, name: "Fresh Orange Juice", category: "drink", price: 6, description: "Freshly squeezed" },
-  { id: nextId++, name: "Chocolate Lava Cake", category: "dessert", price: 10, description: "Warm chocolate cake with molten center" },
-  { id: nextId++, name: "Tiramisu", category: "dessert", price: 9, description: "Classic Italian coffee-flavored dessert" },
-  { id: nextId++, name: "Crème Brûlée", category: "dessert", price: 11, description: "Vanilla custard with caramelized sugar" },
-  { id: nextId++, name: "Garlic Bread", category: "side", price: 5, description: "Toasted baguette with garlic butter" },
-  { id: nextId++, name: "Mashed Potatoes", category: "side", price: 6, description: "Creamy butter mashed potatoes" },
-  { id: nextId++, name: "Seasonal Vegetables", category: "side", price: 7, description: "Grilled seasonal vegetables" },
+const MOCK_ITEMS: LegacyMenuItem[] = [
+  { id: 1, restaurantId: 1, name: "Grilled Salmon", category: "main", price: 24, description: "Atlantic salmon with herbs" },
+  { id: 2, restaurantId: 1, name: "Beef Tenderloin", category: "main", price: 32, description: "8oz tenderloin" },
+  { id: 3, restaurantId: 1, name: "Caesar Salad", category: "appetizer", price: 10, description: "Romaine, parmesan" },
+  { id: 4, restaurantId: 1, name: "Chocolate Lava Cake", category: "dessert", price: 10, description: "Warm chocolate cake" },
+  { id: 5, restaurantId: 2, name: "Vegetable Risotto", category: "main", price: 16, description: "Creamy arborio rice" },
+  { id: 6, restaurantId: 2, name: "Bruschetta", category: "appetizer", price: 8, description: "Toasted bread with tomatoes" },
+  { id: 7, restaurantId: 2, name: "House Red Wine", category: "drink", price: 8, description: "Glass of Chianti" },
+  { id: 8, restaurantId: 2, name: "Crème Brûlée", category: "dessert", price: 11, description: "Vanilla custard" },
+  { id: 9, restaurantId: 3, name: "Sparkling Water", category: "drink", price: 4, description: "San Pellegrino" },
+  { id: 10, restaurantId: 3, name: "Tiramisu", category: "dessert", price: 9, description: "Classic Italian" },
 ];
 
-export async function getMenuItems(): Promise<MenuItem[]> {
-  return MENU_ITEMS;
-}
-
-export async function getMenuItem(id: number): Promise<MenuItem | undefined> {
-  return MENU_ITEMS.find((m) => m.id === id);
-}
-
-export async function addMenuItem(
-  data: Omit<MenuItem, "id">,
-): Promise<MenuItem> {
-  const item: MenuItem = { id: nextId++, ...data };
-  MENU_ITEMS.push(item);
-  return item;
-}
-
-export async function updateMenuItem(
-  id: number,
-  data: Partial<Omit<MenuItem, "id">>,
-): Promise<MenuItem | undefined> {
-  const item = MENU_ITEMS.find((m) => m.id === id);
-  if (!item) return undefined;
-  if (data.name !== undefined) item.name = data.name;
-  if (data.category !== undefined) item.category = data.category;
-  if (data.price !== undefined) item.price = data.price;
-  if (data.description !== undefined) item.description = data.description;
-  return item;
-}
-
-export async function deleteMenuItem(id: number): Promise<void> {
-  const idx = MENU_ITEMS.findIndex((m) => m.id === id);
-  if (idx !== -1) MENU_ITEMS.splice(idx, 1);
+export async function getMockMenuItems(): Promise<LegacyMenuItem[]> {
+  return MOCK_ITEMS;
 }

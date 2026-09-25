@@ -93,7 +93,7 @@ export function TableBoard({ grouped }: { grouped: GroupedTables[] }) {
                 {group.restaurantName}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-300">
-                {group.city}
+                {group.address}
               </p>
             </div>
             <Can action="createTable">

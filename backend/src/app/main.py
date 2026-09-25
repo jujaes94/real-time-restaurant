@@ -6,10 +6,11 @@ from fastapi.responses import JSONResponse
 from app.application.exceptions import (
     DomainError,
     DuplicateEmailError,
+    DuplicateUsernameError,
     InvalidCredentialsError,
     NotFoundError,
 )
-from app.infrastructure.api.routers import auth, restaurants, tables
+from app.infrastructure.api.routers import auth, menus, restaurants, tables, users
 from app.infrastructure.database.connection import close_db, init_db
 
 
@@ -30,7 +31,9 @@ app = FastAPI(
     openapi_tags=[
         {"name": "auth", "description": "User registration and login"},
         {"name": "restaurants", "description": "Restaurant CRUD and manager assignment"},
-        {"name": "tables", "description": "Table management and status updates"},
+        {"name": "tables", "description": "Table management, assignment, and table orders"},
+        {"name": "menus", "description": "Menu item CRUD and availability toggling"},
+        {"name": "users", "description": "User profile management and admin operations"},
     ],
 )
 
@@ -43,6 +46,13 @@ async def not_found_handler(request: Request, exc: NotFoundError) -> JSONRespons
 @app.exception_handler(DuplicateEmailError)
 async def duplicate_email_handler(
     request: Request, exc: DuplicateEmailError
+) -> JSONResponse:
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
+@app.exception_handler(DuplicateUsernameError)
+async def duplicate_username_handler(
+    request: Request, exc: DuplicateUsernameError
 ) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
@@ -60,5 +70,7 @@ async def domain_error_handler(request: Request, exc: DomainError) -> JSONRespon
 
 
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(restaurants.router)
 app.include_router(tables.router)
+app.include_router(menus.router)

@@ -13,6 +13,7 @@ export type Action =
   | "view:settings"
   | "view:staff"
   | "view:menu"
+  | "view:restaurants"
   | "createTable"
   | "deleteTable"
   | "renameTable"
@@ -29,6 +30,7 @@ const MATRIX: Record<Role, ReadonlySet<Action>> = {
     "view:settings",
     "view:staff",
     "view:menu",
+    "view:restaurants",
     "createTable",
     "deleteTable",
     "renameTable",
@@ -42,6 +44,7 @@ const MATRIX: Record<Role, ReadonlySet<Action>> = {
     "view:salesSummary",
     "view:tables",
     "view:menu",
+    "view:restaurants",
     "createTable",
     "deleteTable",
     "renameTable",

@@ -2,8 +2,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.config import settings
 from app.infrastructure.database.models import (
+    MenuDocument,
     RestaurantDocument,
     RestaurantTableDocument,
+    TableOrderDocument,
     UserDocument,
 )
 
@@ -21,6 +23,8 @@ async def init_db() -> None:
             UserDocument,
             RestaurantDocument,
             RestaurantTableDocument,
+            MenuDocument,
+            TableOrderDocument,
         ],
     )
 

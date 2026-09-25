@@ -17,7 +17,7 @@ import {
   type RestaurantTable,
   type TableStatus,
 } from "@/features/tables/tables";
-import type { MenuItem } from "@/features/menu/menuItems";
+import type { LegacyMenuItem as MenuItem } from "@/features/menu/menuItems";
 import { formatCurrency } from "@/shared/lib/utils";
 
 import { AddOrderItemDialog } from "./AddOrderItemDialog";

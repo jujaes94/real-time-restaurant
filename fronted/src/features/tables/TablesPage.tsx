@@ -7,7 +7,7 @@ import { VisualTableGrid } from "./VisualTableGrid";
 export interface GroupedTables {
   restaurantId: number;
   restaurantName: string;
-  city: string;
+  address: string;
   tables: RestaurantTable[];
 }
 
@@ -20,7 +20,7 @@ export default async function TablesFeature() {
   const grouped: GroupedTables[] = restaurants.map((restaurant) => ({
     restaurantId: restaurant.id,
     restaurantName: restaurant.name,
-    city: restaurant.city,
+    address: restaurant.address,
     tables: tables.filter((t) => t.restaurantId === restaurant.id),
   }));
 

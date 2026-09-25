@@ -14,17 +14,16 @@ type Props = {
 };
 
 const CATEGORIES: { value: MenuCategory; label: string }[] = [
-  { value: "plate", label: "Plate" },
+  { value: "main", label: "Main" },
   { value: "appetizer", label: "Appetizer" },
   { value: "side", label: "Side" },
   { value: "drink", label: "Drink" },
   { value: "dessert", label: "Dessert" },
-  { value: "other", label: "Other" },
 ];
 
 export function EditMenuItemDialog({ open, onClose, onSubmit, item }: Props) {
   const [name, setName] = useState(item?.name ?? "");
-  const [category, setCategory] = useState<MenuCategory>(item?.category ?? "plate");
+  const [category, setCategory] = useState<MenuCategory>(item?.category ?? "main");
   const [price, setPrice] = useState(item?.price?.toString() ?? "");
   const [description, setDescription] = useState(item?.description ?? "");
   const [submitting, setSubmitting] = useState(false);

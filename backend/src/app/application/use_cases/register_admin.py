@@ -1,13 +1,11 @@
-from uuid import UUID
-
 from app.domain.entities import User, UserRole
 from app.domain.repository_interfaces import IUserRepository
 from app.application.dto import RegisterUserDTO
-from app.application.exceptions import DuplicateEmailError, DuplicateUsernameError, DomainError
+from app.application.exceptions import DuplicateEmailError, DuplicateUsernameError
 from app.application.interfaces import IPasswordHasher
 
 
-class RegisterUserUseCase:
+class RegisterAdminUseCase:
     def __init__(
         self,
         user_repo: IUserRepository,
@@ -16,15 +14,7 @@ class RegisterUserUseCase:
         self._user_repo = user_repo
         self._password_hasher = password_hasher
 
-    async def execute(self, dto: RegisterUserDTO, creator_role: UserRole | None = None, creator_restaurant_id: UUID | None = None) -> User:
-        if creator_role == UserRole.MANAGER:
-            if dto.role != UserRole.WAITRESS:
-                raise DomainError("Manager can only register waitress users")
-            if not dto.restaurant_id:
-                raise DomainError("Manager must specify a restaurant_id")
-            if creator_restaurant_id and dto.restaurant_id != creator_restaurant_id:
-                raise DomainError("Manager can only register users for their own restaurant")
-
+    async def execute(self, dto: RegisterUserDTO) -> User:
         existing = await self._user_repo.get_by_email(dto.email)
         if existing:
             raise DuplicateEmailError(f"Email {dto.email} already registered")
@@ -39,7 +29,7 @@ class RegisterUserUseCase:
             hashed_password=self._password_hasher.hash(dto.password),
             full_name=dto.full_name,
             phone_number=dto.phone_number,
-            role=dto.role,
-            restaurant_id=dto.restaurant_id,
+            role=UserRole.ADMIN,
+            restaurant_id=None,
         )
         return await self._user_repo.create(user)

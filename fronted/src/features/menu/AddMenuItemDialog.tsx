@@ -10,20 +10,20 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: { name: string; category: MenuCategory; price: number; description: string }) => void;
+  restaurantId: string;
 };
 
 const CATEGORIES: { value: MenuCategory; label: string }[] = [
-  { value: "plate", label: "Plate" },
+  { value: "main", label: "Main" },
   { value: "appetizer", label: "Appetizer" },
   { value: "side", label: "Side" },
   { value: "drink", label: "Drink" },
   { value: "dessert", label: "Dessert" },
-  { value: "other", label: "Other" },
 ];
 
-export function AddMenuItemDialog({ open, onClose, onSubmit }: Props) {
+export function AddMenuItemDialog({ open, onClose, onSubmit, restaurantId }: Props) {
   const [name, setName] = useState("");
-  const [category, setCategory] = useState<MenuCategory>("plate");
+  const [category, setCategory] = useState<MenuCategory>("main");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +45,7 @@ export function AddMenuItemDialog({ open, onClose, onSubmit }: Props) {
 
   function resetForm() {
     setName("");
-    setCategory("plate");
+    setCategory("main");
     setPrice("");
     setDescription("");
   }

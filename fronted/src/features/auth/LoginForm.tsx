@@ -93,7 +93,7 @@ export function LoginForm() {
             <Button
               key={demo.email}
               variant="secondary"
-              onClick={() => handleDemo(demo.email, demo.password)}
+              onClick={() => handleDemo(demo.email, demo.password!)}
               disabled={submitting}
             >
               {demo.label}

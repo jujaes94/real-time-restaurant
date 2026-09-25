@@ -16,3 +16,7 @@ class InvalidCredentialsError(DomainError):
 
 class UnauthorizedError(DomainError):
     ...
+
+
+class DuplicateUsernameError(DomainError):
+    ...

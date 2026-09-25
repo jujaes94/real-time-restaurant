@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 
-from app.application.use_cases.assign_manager import AssignManagerUseCase
+from app.application.use_cases.assign_staff import AssignStaffUseCase
 from app.application.use_cases.create_restaurant import CreateRestaurantUseCase
 from app.application.use_cases.delete_restaurant import DeleteRestaurantUseCase
 from app.application.use_cases.get_restaurant import GetRestaurantUseCase
@@ -11,12 +11,13 @@ from app.application.use_cases.update_restaurant import UpdateRestaurantUseCase
 from app.domain.entities import UserRole
 from app.infrastructure.api.dependencies import require_role
 from app.infrastructure.api.schemas import (
-    AssignManagerRequest,
+    AssignStaffRequest,
     RestaurantCreate,
     RestaurantResponse,
     RestaurantUpdate,
     UserResponse,
 )
+from app.infrastructure.database.models import UserDocument
 from app.infrastructure.repositories.beanie_repositories import (
     BeanieRestaurantRepository,
     BeanieUserRepository,
@@ -80,18 +81,20 @@ async def delete_restaurant(
 
 
 @router.post(
-    "/{restaurant_id}/assign-manager",
+    "/{restaurant_id}/assign-staff",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
-    summary="Assign a manager to a restaurant (Admin only)",
+    summary="Assign staff to a restaurant (Admin/Manager)",
 )
-async def assign_manager(
+async def assign_staff(
     restaurant_id: UUID,
-    dto: AssignManagerRequest,
-    _=Depends(require_role(UserRole.ADMIN)),
+    dto: AssignStaffRequest,
+    current_user: UserDocument = Depends(require_role(UserRole.ADMIN, UserRole.MANAGER)),
 ) -> UserResponse:
     user_repo = BeanieUserRepository()
     restaurant_repo = BeanieRestaurantRepository()
-    use_case = AssignManagerUseCase(user_repo, restaurant_repo)
-    user = await use_case.execute(dto)
+    use_case = AssignStaffUseCase(user_repo, restaurant_repo)
+    from app.application.dto import AssignStaffDTO
+    use_case_dto = AssignStaffDTO(user_id=dto.user_id, restaurant_id=dto.restaurant_id)
+    user = await use_case.execute(use_case_dto, actor_role=current_user.role, actor_restaurant_id=current_user.restaurant_id)
     return UserResponse(**user.__dict__)
